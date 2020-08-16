@@ -11,7 +11,7 @@ import {LayerControls,
 import taxiData from '../../../data/taxi';
 
 const MAPBOX_STYLE = 'mapbox://styles/mapbox/light-v9';
-const MAPBOX_TOKEN = 'pk.eyJ1Ijoicm9iZXJ0YWNybW90YSIsImEiOiJja2R3ejVwNmMyeHFvMnJtaGtzOWN4Zmw3In0.Kv9z-dywsFVuT31mjJP7IA';// process.env.MapboxAccessToken; // eslint-disable-line
+const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 const INITIAL_VIEW_STATE = {
   longitude: -74,

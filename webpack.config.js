@@ -1,3 +1,4 @@
+const Dotenv = require('dotenv-webpack');
 const resolve = require('path').resolve;
 const webpack = require('webpack');
 
@@ -24,6 +25,7 @@ module.exports = {
     }
   },
   plugins: [
+    new Dotenv(),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.DefinePlugin({
       'process.env': {
