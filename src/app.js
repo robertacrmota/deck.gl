@@ -1,7 +1,14 @@
-import {MapStylePicker} from './controls';
+import {renderLayers} from './deckgl-layers';
 import React, { Component } from 'react';
 import { StaticMap } from 'react-map-gl';
+import { tooltipStyle } from './style';
 import DeckGL from 'deck.gl';
+import {LayerControls,
+        MapStylePicker,
+        SCATTERPLOT_CONTROLS} from './controls';
+
+
+import taxiData from '../../../data/taxi';
 
 const MAPBOX_STYLE = 'mapbox://styles/mapbox/light-v9';
 const MAPBOX_TOKEN = 'pk.eyJ1Ijoicm9iZXJ0YWNybW90YSIsImEiOiJja2R3ejVwNmMyeHFvMnJtaGtzOWN4Zmw3In0.Kv9z-dywsFVuT31mjJP7IA';// process.env.MapboxAccessToken; // eslint-disable-line
@@ -45,8 +52,51 @@ function SetToken() {
 
 export default class App extends Component {
   state = {
+    hover: {
+      x: 0,
+      y: 0,
+      hoveredObject: null
+    },
+    points: [],
+    settings: Object.keys(SCATTERPLOT_CONTROLS).reduce(
+      (accu, key) => ({
+        ...accu,
+        [key]: SCATTERPLOT_CONTROLS[key].value
+      }),
+      {}),
     style: 'mapbox://styles/mapbox/dark-v9'
   };
+
+
+  _processData() {
+    const points = taxiData.reduce((accu, curr) => {
+      accu.push({
+        position: [Number(curr.pickup_longitude), Number(curr.pickup_latitude)],
+        pickup: true
+      });
+      accu.push({
+        position: [
+          Number(curr.dropoff_longitude),
+          Number(curr.dropoff_latitude)
+        ],
+        pickup: false
+      });
+      return accu;
+    }, []);
+    this.setState({
+      points
+    });
+  }
+
+  _updateLayerSettings(settings) {
+    this.setState({ settings });
+  }
+
+  _onHover({ x, y, object }) {
+    const label = object ? (object.pickup ? 'Pickup' : 'Dropoff') : null;
+
+    this.setState({ hover: { x, y, hoveredObject: object, label } });
+  }
 
   // --------------------------------------------------------
   // react-map-gl callbacks
@@ -58,14 +108,36 @@ export default class App extends Component {
   // react lifecycle methods
   // --------------------------------------------------------
 
+  componentDidMount() {
+    this._processData();
+  }
 
   render() {
+    const data = this.state.points;
+    if (!data.length) { return null; }
+
+    const { hover, settings } = this.state;
     return (
       <div>
-        <MapStylePicker onStyleChange={this.onStyleChange} currentStyle={this.state.style}/>
+          {hover.hoveredObject && (
+            <div style={{...tooltipStyle, transform: `translate(${hover.x}px, ${hover.y}px)`}}>
+              <div>{hover.label}</div>
+            </div>
+          )}
+          <MapStylePicker onStyleChange={this.onStyleChange} 
+                          currentStyle={this.state.style}
+          />
+          <LayerControls settings={this.state.settings}
+                         propTypes={SCATTERPLOT_CONTROLS}
+                         onChange={settings => this._updateLayerSettings(settings)}
+          />
           {MAPBOX_TOKEN ? ( 
-            <DeckGL initialViewState={INITIAL_VIEW_STATE} controller>
-              <StaticMap mapStyle={this.state.style} mapboxApiAccessToken={MAPBOX_TOKEN} />
+            <DeckGL layers={renderLayers({data: this.state.points, settings: this.state.settings, onHover: hover => this._onHover(hover)})}
+                    initialViewState={INITIAL_VIEW_STATE} 
+                    controller>
+                <StaticMap mapStyle={this.state.style} 
+                           mapboxApiAccessToken={MAPBOX_TOKEN}             
+                />
             </DeckGL>
           ) : (
             <SetToken />
