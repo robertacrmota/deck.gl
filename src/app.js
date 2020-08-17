@@ -2,6 +2,7 @@ import {renderLayers} from './deckgl-layers';
 import React, { Component } from 'react';
 import { StaticMap } from 'react-map-gl';
 import { tooltipStyle } from './style';
+import Charts from './charts';
 import DeckGL from 'deck.gl';
 import {LayerControls,
         MapStylePicker,
@@ -59,6 +60,8 @@ export default class App extends Component {
       hoveredObject: null
     },
     points: [],
+    pickups: [],
+    dropoffs: {},
     settings: Object.keys(HEXAGON_CONTROLS).reduce(
       (accu, key) => ({
         ...accu,
@@ -69,23 +72,55 @@ export default class App extends Component {
   };
 
 
-  _processData() {
-    const points = taxiData.reduce((accu, curr) => {
-      accu.push({
-        position: [Number(curr.pickup_longitude), Number(curr.pickup_latitude)],
-        pickup: true
-      });
-      accu.push({
-        position: [
-          Number(curr.dropoff_longitude),
-          Number(curr.dropoff_latitude)
-        ],
-        pickup: false
-      });
-      return accu;
-    }, []);
+  _processData = () => {
+    const data = taxiData.reduce(
+      (accu, curr) => {
+        const pickupHour = new Date(curr.pickup_datetime).getUTCHours();
+        const dropoffHour = new Date(curr.dropoff_datetime).getUTCHours();
+
+        const pickupLongitude = Number(curr.pickup_longitude);
+        const pickupLatitude = Number(curr.pickup_latitude);
+
+        if (!isNaN(pickupLongitude) && !isNaN(pickupLatitude)) {
+          accu.points.push({
+            position: [pickupLongitude, pickupLatitude],
+            hour: pickupHour,
+            pickup: true
+          });
+        }
+
+        const dropoffLongitude = Number(curr.dropoff_longitude);
+        const dropoffLatitude = Number(curr.dropoff_latitude);
+
+        if (!isNaN(dropoffLongitude) && !isNaN(dropoffLatitude)) {
+          accu.points.push({
+            position: [dropoffLongitude, dropoffLatitude],
+            hour: dropoffHour,
+            pickup: false
+          });
+        }
+
+        const prevPickups = accu.pickupObj[pickupHour] || 0;
+        const prevDropoffs = accu.dropoffObj[dropoffHour] || 0;
+
+        accu.pickupObj[pickupHour] = prevPickups + 1;
+        accu.dropoffObj[dropoffHour] = prevDropoffs + 1;
+
+        return accu;
+      },
+      {
+        points: [],
+        pickupObj: {},
+        dropoffObj: {}
+      }
+    );
+
+    const pickupsArr = Object.entries(data.pickupObj);
+
     this.setState({
-      points
+      points : data.points, 
+      pickups: pickupsArr.map(p => {return {x: Number(p[0]), y: p[1]}}), 
+      dropoffs: data.dropoffObj
     });
   }
 
@@ -133,13 +168,16 @@ export default class App extends Component {
                          onChange={settings => this._updateLayerSettings(settings)}
           />
           {MAPBOX_TOKEN ? ( 
-            <DeckGL layers={renderLayers({data: this.state.points, settings: this.state.settings, onHover: hover => this._onHover(hover)})}
-                    initialViewState={INITIAL_VIEW_STATE} 
-                    controller>
-                <StaticMap mapStyle={this.state.style} 
-                           mapboxApiAccessToken={MAPBOX_TOKEN}             
-                />
-            </DeckGL>
+            <React.Fragment>
+              <DeckGL layers={renderLayers({data: this.state.points, settings: this.state.settings, onHover: hover => this._onHover(hover)})}
+                      initialViewState={INITIAL_VIEW_STATE} 
+                      controller>
+                  <StaticMap mapStyle={this.state.style} 
+                            mapboxApiAccessToken={MAPBOX_TOKEN}             
+                  />
+              </DeckGL>
+              <Charts {...this.state} />
+            </React.Fragment>
           ) : (
             <SetToken />
           )}

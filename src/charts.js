@@ -4,6 +4,9 @@ import { charts } from "./style";
 import { VerticalBarSeries, XAxis, XYPlot, YAxis } from "react-vis";
 
 export default function Charts({ pickups }) {
+  if (!pickups) {
+    return <div style={charts} />;
+  }
   return (
     <div style={charts}>
       <h2>Pickups by hour</h2>
