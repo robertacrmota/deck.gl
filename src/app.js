@@ -5,7 +5,8 @@ import { tooltipStyle } from './style';
 import DeckGL from 'deck.gl';
 import {LayerControls,
         MapStylePicker,
-        SCATTERPLOT_CONTROLS} from './controls';
+        SCATTERPLOT_CONTROLS,
+        HEXAGON_CONTROLS} from './controls';
 
 
 import taxiData from '../../../data/taxi';
@@ -58,10 +59,10 @@ export default class App extends Component {
       hoveredObject: null
     },
     points: [],
-    settings: Object.keys(SCATTERPLOT_CONTROLS).reduce(
+    settings: Object.keys(HEXAGON_CONTROLS).reduce(
       (accu, key) => ({
         ...accu,
-        [key]: SCATTERPLOT_CONTROLS[key].value
+        [key]: HEXAGON_CONTROLS[key].value
       }),
       {}),
     style: 'mapbox://styles/mapbox/dark-v9'
@@ -128,7 +129,7 @@ export default class App extends Component {
                           currentStyle={this.state.style}
           />
           <LayerControls settings={this.state.settings}
-                         propTypes={SCATTERPLOT_CONTROLS}
+                         propTypes={HEXAGON_CONTROLS}
                          onChange={settings => this._updateLayerSettings(settings)}
           />
           {MAPBOX_TOKEN ? ( 
