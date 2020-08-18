@@ -62,6 +62,7 @@ export default class App extends Component {
     points: [],
     pickups: [],
     dropoffs: {},
+    highlightedHour: null,
     settings: Object.keys(HEXAGON_CONTROLS).reduce(
       (accu, key) => ({
         ...accu,
@@ -135,6 +136,20 @@ export default class App extends Component {
   }
 
   // --------------------------------------------------------
+  // react-vist callbacks
+  // --------------------------------------------------------
+
+  _onHighlight(highlightedHour) {
+    this.setState({highlightedHour});
+  }
+
+  _onSelect(selectedHour) {
+    this.setState({
+      selectedHour: selectedHour === this.state.selectedHour ? null : selectedHour
+    });
+  }
+
+  // --------------------------------------------------------
   // react-map-gl callbacks
   // --------------------------------------------------------
 
@@ -176,7 +191,10 @@ export default class App extends Component {
                             mapboxApiAccessToken={MAPBOX_TOKEN}             
                   />
               </DeckGL>
-              <Charts {...this.state} />
+              <Charts {...this.state} 
+                       highlight={hour => this._onHighlight(hour)} 
+                       select={hour => this._onSelect(hour)}
+              />
             </React.Fragment>
           ) : (
             <SetToken />
