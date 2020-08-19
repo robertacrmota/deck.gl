@@ -26,7 +26,9 @@ const elevationRange = [0, 1000];
 
 
 export function renderLayers(props) {
-  const {data, onHover, settings} = props;
+  const {data, hour, onHover, settings} = props;
+  const filteredData = hour === null ? data : data.filter(d => d.hour === hour);
+
   return [
     settings.showHexagon  && 
     new ScatterplotLayer({
@@ -38,7 +40,7 @@ export function renderLayers(props) {
       pickable: true,                 // whether this layer would be interactive.
       radiusMinPixels: 0.25,
       radiusMaxPixels: 30,
-      data,
+      data: filteredData,
       onHover,
       ...settings
     }),
@@ -53,7 +55,7 @@ export function renderLayers(props) {
         lightSettings: LIGHT_SETTINGS,
         opacity: 0.8,
         pickable: true,
-        data,
+        data: filteredData,
         onHover,
         ...settings
       })

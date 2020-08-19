@@ -63,6 +63,7 @@ export default class App extends Component {
     pickups: [],
     dropoffs: {},
     highlightedHour: null,
+    selectedHour: null,
     settings: Object.keys(HEXAGON_CONTROLS).reduce(
       (accu, key) => ({
         ...accu,
@@ -184,7 +185,10 @@ export default class App extends Component {
           />
           {MAPBOX_TOKEN ? ( 
             <React.Fragment>
-              <DeckGL layers={renderLayers({data: this.state.points, settings: this.state.settings, onHover: hover => this._onHover(hover)})}
+              <DeckGL layers={renderLayers({data: this.state.points, 
+                                            hour: this.state.highlightedHour || this.state.selectedHour,
+                                            settings: this.state.settings, 
+                                            onHover: hover => this._onHover(hover)})}
                       initialViewState={INITIAL_VIEW_STATE} 
                       controller>
                   <StaticMap mapStyle={this.state.style} 
