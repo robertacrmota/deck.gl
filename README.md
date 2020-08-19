@@ -2,10 +2,10 @@
 
 ![](deckgl-thumb.gif)
 
-Sample project to test [deck.gl](https://github.com/visgl/deck.gl). The data relates to pickups and dropoffs locations of Uber trips. The visualization includes two coordinated views: i) map with two data overlays and ii) a bar chart.
+Sample project to test [deck.gl](https://github.com/visgl/deck.gl). The data relates to pickup and dropoff locations of Uber trips. The visualization includes two coordinated views: i) map with two data overlays and ii) a bar chart.
 
 
-#### Data overlays
+#### Map data overlays
 Hexagonal and scatterplot layers. Hexagonal layer displays pickup/dropoff spatial distribution. Scatterplot overlay shows pickups (orange) and dropoffs (purple) locations.
 
 #### Chart
