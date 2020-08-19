@@ -12,7 +12,6 @@ Hexagonal and scatterplot layers. Hexagonal layer displays pickup/dropoff spatia
 Bar chart shows pickup distribution per hour. It is built using [react-vis](http://uber.github.io/react-vis/)
 
 #### Usage
-Copy the content of this folder to your project. Run
 ```
 npm install
 npm start
